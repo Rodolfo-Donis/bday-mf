@@ -1,64 +1,11 @@
-const LETTER_TEXT = `Fernanda,
-
-Hoy, en tu cumpleaños, quería escribirte unas palabras y desearte de corazón lo mejor en este nuevo año de tu vida.
-
-Creo que has pasado por muchas cosas, algunas buenas y otras no tan buenas, pero también he tenido la oportunidad de ver cómo poco a poco has ido avanzando. Has ido mejorando, solucionando cosas, aprendiendo y haciendo lo mejor que puedes con cada situación que se te presenta. Y creo que eso dice mucho de la mujer que eres.
-
-Por eso, hoy quería darte un abrazo. Uno de esos abrazos que, aunque no pueda darte físicamente en este momento, espero que puedas sentir de alguna manera.
-
-Deseo que Dios te bendiga siempre y que llene tu vida de bendiciones. Que te acompañe en cada cosa que te propongas, en cada decisión que tomes y en cada momento en el que necesites un poco de fuerza para seguir adelante.
-
-Eres una persona única. Eres una mujer fuerte, bonita y con muchísimo por delante. Sigue creyendo en ti, incluso cuando las cosas no salgan como esperabas. Tienes a tu familia, tienes amigas que he podido ver que te apoyan muchísimo y que están ahí para ti. Cuídalas, mantenlas cerca y recuerda que esos vínculos son muy importantes.
-
-Y cuando las cosas se vean mal, no te rindas!!
-
-Como nos ha enseñado Naruto  y otras series , tantas veces, no importa cuántas veces caigamos; lo importante es encontrar la voluntad para levantarnos y continuar. Tu historia todavía tiene muchísimo por delante. Tienes mucho, mucho por vivir, descubrir, aprender y disfrutar.
-
-Estoy seguro de que poco a poco vas a ir recuperándote y encontrando tu camino en cada aspecto de tu vida. No tengo dudas de que puedes hacerlo. Y, sobre todo, deseo que cuides mucho de ti y de tu salud, porque eso es de las cosas más importantes que tienes.
-
-Espero que esta carta no sea demasiado ridícula. La verdad es que quería darte algo físico, un regalito que pudieras guardar, pero a veces hay otras formas de estar presente y de hacerle saber a alguien que lo quieres y que deseas que esté bien.
-
-Y pues, como sabrás, te quiero mucho y me gustas muchísimo. También quiero pedirte disculpas por esas veces en las que ha sido difícil hablarnos, entendernos o simplemente encontrar la manera correcta de comunicarnos. A pesar de todo, quiero que sepas algo:
-
-No estás sola.
-
-Siempre habrá personas que te quieren, que creen en ti y que desean verte bien. Espero poder ser también una de esas personas para ti.
-
-Ojalá hayas pasado un bonito cumpleaños, que hayas sonreído mucho y que hayas podido disfrutar este día con las personas que quieres o disfrutar de un descanso.
-
-Y probablemente esta carta ni siquiera te llegue a tiempo para tu cumpleaños... (errores) y lo siento
-
-Solo quería que tuvieras estas palabras.
-
-Sigue adelante.
-
-Sigue creyendo en ti.
-
-No importa qué tan difícil se vea el camino.
-
-Tú puedes con todo aquello que te propongas.
-
-Y como te lo he dicho siempre:
-
-Brillas!
-
-(Cuando estas feliz, tu risa y tu voz son muy lindas de escuchar)
-
-Nunca dejes que un momento difícil te haga olvidar eso.
-
-Feliz cumpleaños, Fernanda.
-
-Que tus 26 años sean el comienzo de una etapa llena de cosas buenas, nuevas oportunidades, tranquilidad, salud, amor y muchas razones para sonreír.
-
-Y que Dios te bendiga siempre.`
 const starLayer = document.getElementById('stars')
 const petalLayer = document.getElementById('petals')
 const sealButton = document.getElementById('sealButton')
 const rolledScroll = document.getElementById('rolledScroll')
 const ninjaLetter = document.getElementById('ninjaLetter')
 const letterBody = document.getElementById('letterBody')
+const letterSource = letterBody.textContent.trim()
 let isLetterOpen = false
-let sealTouchStartY = 0
 
 function createStars (count) {
   const fragment = document.createDocumentFragment()
@@ -88,7 +35,6 @@ function createPetals (count) {
 }
 
 function writeLetter (text) {
-  letterBody.textContent = ''
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
   ).matches
@@ -96,41 +42,36 @@ function writeLetter (text) {
     letterBody.textContent = text
     return
   }
+  letterBody.textContent = ''
   let index = 0
+  const charsPerTick = 28
   const timer = window.setInterval(() => {
-    letterBody.textContent = text.slice(0, index + 1)
-    index += 1
+    index = Math.min(text.length, index + charsPerTick)
+    letterBody.textContent = text.slice(0, index)
     if (index >= text.length) {
       window.clearInterval(timer)
     }
-  }, 18)
+  }, 16)
 }
 
-function openLetter () {
+function openLetter (event) {
+  if (event) {
+    event.preventDefault()
+  }
   if (isLetterOpen) {
+    ninjaLetter.scrollIntoView({ behavior: 'smooth', block: 'start' })
     return
   }
   isLetterOpen = true
   sealButton.classList.add('is-hidden')
   rolledScroll.classList.add('is-hidden')
-  sealButton.setAttribute('aria-expanded', 'true')
   ninjaLetter.classList.add('is-open')
-  ninjaLetter.setAttribute('aria-hidden', 'false')
-  writeLetter(LETTER_TEXT)
-  ninjaLetter.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  writeLetter(letterSource)
+  ninjaLetter.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-function handleSealTouchStart (event) {
-  sealTouchStartY = event.changedTouches[0].clientY
-}
-
-function handleSealTouchEnd (event) {
-  const touchEndY = event.changedTouches[0].clientY
-  if (Math.abs(touchEndY - sealTouchStartY) > 12) {
-    return
-  }
-  event.preventDefault()
-  openLetter()
+function isLetterHash () {
+  return window.location.hash === '#ninjaLetter'
 }
 
 function initializePage () {
@@ -142,13 +83,18 @@ function initializePage () {
   if (!reduceMotion) {
     createPetals(isNarrow ? 6 : 10)
   }
-  sealButton.addEventListener('click', openLetter)
-  sealButton.addEventListener('touchstart', handleSealTouchStart, {
-    passive: true
+  const openControls = document.querySelectorAll('[href="#ninjaLetter"]')
+  openControls.forEach(control => {
+    control.addEventListener('click', openLetter)
   })
-  sealButton.addEventListener('touchend', handleSealTouchEnd, {
-    passive: false
+  window.addEventListener('hashchange', () => {
+    if (isLetterHash()) {
+      openLetter()
+    }
   })
+  if (isLetterHash()) {
+    openLetter()
+  }
 }
 
 initializePage()

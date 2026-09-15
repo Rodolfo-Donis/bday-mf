@@ -244,6 +244,7 @@ body {
   background: linear-gradient(135deg, #3a1018, #c45a6a);
   opacity: 0.72;
   animation: fall linear infinite;
+  pointer-events: none;
 }
 
 .hero,
@@ -478,6 +479,7 @@ h2 {
 
 .scroll-stage {
   position: relative;
+  z-index: 4;
   display: grid;
   justify-items: center;
   margin: 2.8rem auto 0;
@@ -489,7 +491,7 @@ h2 {
   z-index: 1;
   width: min(22rem, 82vw);
   height: 2.5rem;
-  margin-bottom: -4.8rem;
+  margin-bottom: 0.8rem;
   border-radius: 999px;
   background: linear-gradient(90deg, #000, #3a3a3a 18%, #111 48%, #d4af6a 78%, #000);
   box-shadow: 0 14px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -506,12 +508,15 @@ h2 {
   display: grid;
   justify-items: center;
   gap: 0.9rem;
-  min-width: 10rem;
-  min-height: 10rem;
-  padding: 0.75rem;
+  min-width: 11rem;
+  min-height: 11rem;
+  padding: 1rem;
   border: 0;
   background: transparent;
   color: inherit;
+  text-decoration: none;
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: rgba(255, 122, 24, 0.35);
@@ -532,6 +537,13 @@ h2 {
     0 16px 30px rgba(0, 0, 0, 0.55),
     inset 0 -8px 16px rgba(0, 0, 0, 0.4);
   animation: pulse 2.6s ease-in-out infinite;
+}
+
+.seal,
+.seal-leaf-icon,
+.seal-text,
+.seal-hint,
+.seal-button svg {
   pointer-events: none;
 }
 
@@ -560,22 +572,21 @@ h2 {
 }
 
 .ninja-letter {
+  display: none;
   width: min(42rem, 100%);
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(1.2rem);
-  pointer-events: none;
-  transition: max-height 0.9s var(--ease), opacity 0.6s ease, transform 0.6s var(--ease);
+  scroll-margin-top: 3rem;
 }
 
-.ninja-letter.is-open {
-  max-height: 80rem;
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  pointer-events: auto;
+.ninja-letter.is-open,
+.ninja-letter:target {
+  display: block;
+}
+
+.scroll-stage:has(.ninja-letter.is-open) .seal-button,
+.scroll-stage:has(.ninja-letter.is-open) .rolled-scroll,
+.scroll-stage:has(.ninja-letter:target) .seal-button,
+.scroll-stage:has(.ninja-letter:target) .rolled-scroll {
+  display: none;
 }
 
 .scroll-top,
@@ -619,6 +630,7 @@ h2 {
   margin: 1rem 0 1.4rem;
   font-size: clamp(1.15rem, 2.6vw, 1.35rem);
   line-height: 1.75;
+  white-space: pre-wrap;
 }
 
 .letter-close,
@@ -726,6 +738,11 @@ h2 {
     width: 1.7rem;
     height: 6.2rem;
     opacity: 0.4;
+  }
+
+  .cta {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(255, 122, 24, 0.35);
   }
 
   .seal {
