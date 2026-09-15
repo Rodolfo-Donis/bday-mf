@@ -57,11 +57,8 @@ const sealButton = document.getElementById('sealButton')
 const rolledScroll = document.getElementById('rolledScroll')
 const ninjaLetter = document.getElementById('ninjaLetter')
 const letterBody = document.getElementById('letterBody')
-const musicToggle = document.getElementById('musicToggle')
-const midiFileInput = document.getElementById('midiFile')
-const midiPlayer = document.getElementById('midiPlayer')
-const villageMidi = createVillageMidi()
-let midiObjectUrl = ''
+let isLetterOpen = false
+let sealTouchStartY = 0
 
 function createStars (count) {
   const fragment = document.createDocumentFragment()
@@ -110,6 +107,10 @@ function writeLetter (text) {
 }
 
 function openLetter () {
+  if (isLetterOpen) {
+    return
+  }
+  isLetterOpen = true
   sealButton.classList.add('is-hidden')
   rolledScroll.classList.add('is-hidden')
   sealButton.setAttribute('aria-expanded', 'true')
@@ -119,67 +120,17 @@ function openLetter () {
   ninjaLetter.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
-function setMusicLabel (isPlaying) {
-  musicToggle.setAttribute('aria-pressed', String(isPlaying))
-  musicToggle.classList.toggle('is-waiting', !isPlaying)
-  const label =
-    midiObjectUrl && !isPlaying
-      ? 'Reproducir MIDI'
-      : isPlaying
-      ? 'Pausar MIDI'
-      : 'Reproducir MIDI'
-  musicToggle.querySelector('.music-label').textContent = label
+function handleSealTouchStart (event) {
+  sealTouchStartY = event.changedTouches[0].clientY
 }
 
-function stopAllMusic () {
-  villageMidi.stop()
-  if (midiPlayer && typeof midiPlayer.stop === 'function') {
-    midiPlayer.stop()
-  }
-  setMusicLabel(false)
-}
-
-async function startLoadedMidi () {
-  if (!midiPlayer || !midiObjectUrl) {
-    return false
-  }
-  midiPlayer.src = midiObjectUrl
-  if (typeof midiPlayer.start === 'function') {
-    midiPlayer.start()
-    return true
-  }
-  return false
-}
-
-async function toggleMusic () {
-  const isMidiPlaying = Boolean(
-    midiPlayer && midiPlayer.hasAttribute('playing')
-  )
-  if (villageMidi.isActive() || isMidiPlaying) {
-    stopAllMusic()
+function handleSealTouchEnd (event) {
+  const touchEndY = event.changedTouches[0].clientY
+  if (Math.abs(touchEndY - sealTouchStartY) > 12) {
     return
   }
-  if (midiObjectUrl) {
-    const didStart = await startLoadedMidi()
-    if (didStart) {
-      setMusicLabel(true)
-      return
-    }
-  }
-  await villageMidi.start()
-  setMusicLabel(true)
-}
-
-function loadMidiFile (file) {
-  if (!file) {
-    return
-  }
-  stopAllMusic()
-  if (midiObjectUrl) {
-    URL.revokeObjectURL(midiObjectUrl)
-  }
-  midiObjectUrl = URL.createObjectURL(file)
-  setMusicLabel(false)
+  event.preventDefault()
+  openLetter()
 }
 
 function initializePage () {
@@ -192,11 +143,11 @@ function initializePage () {
     createPetals(isNarrow ? 6 : 10)
   }
   sealButton.addEventListener('click', openLetter)
-  musicToggle.classList.add('is-waiting')
-  musicToggle.addEventListener('click', toggleMusic)
-  midiFileInput.addEventListener('change', event => {
-    const input = event.target
-    loadMidiFile(input.files && input.files[0])
+  sealButton.addEventListener('touchstart', handleSealTouchStart, {
+    passive: true
+  })
+  sealButton.addEventListener('touchend', handleSealTouchEnd, {
+    passive: false
   })
 }
 
